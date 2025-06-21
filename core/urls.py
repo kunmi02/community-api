@@ -25,26 +25,24 @@ from drf_yasg import openapi
 
 # Simple health check view
 def health_check(request):
-    import os
-    import sys
-    import django
+    return JsonResponse({"status": "ok"})
     
     # Collect system information for debugging
-    debug_info = {
-        "status": "ok",
-        "message": "Service is running",
-        "django_version": django.get_version(),
-        "python_version": sys.version,
-        "environment": {
-            "DJANGO_SETTINGS_MODULE": os.environ.get("DJANGO_SETTINGS_MODULE", "Not set"),
-            "DATABASE_URL_SET": os.environ.get("DATABASE_URL") is not None,
-            "MYSQL_VARS_SET": any(os.environ.get(var) for var in ["MYSQLHOST", "MYSQL_HOST"]),
-        },
-        "request_meta": {
-            "HTTP_HOST": request.META.get("HTTP_HOST", "Not available"),
-            "REMOTE_ADDR": request.META.get("REMOTE_ADDR", "Not available"),
-        }
-    }
+    # debug_info = {
+    #     "status": "ok",
+    #     "message": "Service is running",
+    #     "django_version": django.get_version(),
+    #     "python_version": sys.version,
+    #     "environment": {
+    #         "DJANGO_SETTINGS_MODULE": os.environ.get("DJANGO_SETTINGS_MODULE", "Not set"),
+    #         "DATABASE_URL_SET": os.environ.get("DATABASE_URL") is not None,
+    #         "MYSQL_VARS_SET": any(os.environ.get(var) for var in ["MYSQLHOST", "MYSQL_HOST"]),
+    #     },
+    #     "request_meta": {
+    #         "HTTP_HOST": request.META.get("HTTP_HOST", "Not available"),
+    #         "REMOTE_ADDR": request.META.get("REMOTE_ADDR", "Not available"),
+    #     }
+    # }
     
     return JsonResponse(debug_info)
 
@@ -64,7 +62,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     # Health check endpoint for Railway
-    path('', health_check, name='health_check'),
+    path('health-check', health_check, name='health_check'),
     
     path('admin/', admin.site.urls),
     path('api/', include('users.urls')),
