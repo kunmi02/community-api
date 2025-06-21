@@ -51,8 +51,8 @@ DATABASES = {
         'NAME': os.getenv('MYSQLDATABASE', 'fallback_db'),
         'USER': os.getenv('MYSQLUSER', 'root'),
         'PASSWORD': os.getenv('MYSQLPASSWORD', ''),
-        'HOST': os.getenv('MYSQLHOST', '127.0.0.1'),  # not 'localhost'
-        'PORT': os.getenv('MYSQLPORT', '3306'),
+        'HOST': os.getenv('MYSQLHOST',),  # not 'localhost'
+        'PORT': os.getenv('MYSQLPORT'),
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         }
