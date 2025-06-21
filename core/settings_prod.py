@@ -48,10 +48,10 @@ import os
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('MYSQLDATABASE'),
+        'NAME': os.getenv('MYSQL_DATABASE'),
         'USER': os.getenv('MYSQLUSER'),
         'PASSWORD': os.getenv('MYSQLPASSWORD'),
-        'HOST': os.getenv('MYSQLHOST'),  # Default to TCP connection
+        'HOST': os.getenv('MYSQLHOST'),
         'PORT': os.getenv('MYSQLPORT'),
         'OPTIONS': {
             'charset': 'utf8mb4',
