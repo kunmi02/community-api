@@ -3,6 +3,7 @@ Production settings for the Django project.
 """
 
 from .settings import *
+import dj_database_url
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -24,6 +25,15 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Add WhiteNoise middleware
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+
+# Allow Railway domain
+ALLOWED_HOSTS = ['*']
+
+# Configure Database using Railway's DATABASE_URL
+if os.environ.get('DATABASE_URL'):
+    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+else:
+    # Keep the default database configuration from settings.py
 
 # Disable browsable API in production
 REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (
