@@ -9,6 +9,7 @@ import os
 import sys
 import time
 import django
+import MySQLdb
 from urllib.parse import urlparse
 
 # Set up Django environment
@@ -57,34 +58,60 @@ def main():
         print(f"Failed to initialize Django: {e}")
         return 1
     
-    # Import database modules
-    from django.db import connections
-    from django.db.utils import OperationalError
-    
     # Try to connect to the database
     try:
-        connection = connections['default']
-        connection.ensure_connection()
-        print("✅ Successfully connected to the database!")
+        conn = MySQLdb.connect(
+            host=parsed.hostname,
+            port=parsed.port or 3306,
+            user=parsed.username,
+            passwd=parsed.password,
+            db=parsed.path.strip('/'),
+        )
         
-        # Get database info
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT VERSION()")
-            version = cursor.fetchone()[0]
-            print(f"Database version: {version}")
-            
-            cursor.execute("SHOW VARIABLES LIKE 'character_set_database'")
-            charset = cursor.fetchone()[1]
-            print(f"Database charset: {charset}")
-            
-            cursor.execute("SHOW VARIABLES LIKE 'sql_mode'")
-            sql_mode = cursor.fetchone()[1]
-            print(f"SQL mode: {sql_mode}")
+        cursor = conn.cursor()
         
+        # Get MySQL version
+        cursor.execute("SELECT VERSION()")
+        version = cursor.fetchone()[0]
+        print(f"Connected to MySQL server version: {version}")
+        
+        # Get character set
+        cursor.execute("SHOW VARIABLES LIKE 'character_set_database'")
+        charset = cursor.fetchone()[1]
+        print(f"Database character set: {charset}")
+        
+        # Get SQL mode
+        cursor.execute("SELECT @@sql_mode")
+        sql_mode = cursor.fetchone()[0]
+        print(f"SQL mode: {sql_mode}")
+        
+        # Check if STRICT_TRANS_TABLES is in the SQL mode
+        if 'STRICT_TRANS_TABLES' not in sql_mode:
+            print("WARNING: STRICT_TRANS_TABLES is not in SQL mode. Django requires this for proper operation.")
+            print("Attempting to set SQL mode with STRICT_TRANS_TABLES...")
+            try:
+                cursor.execute("SET SESSION sql_mode='STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION'")
+                cursor.execute("SELECT @@sql_mode")
+                new_sql_mode = cursor.fetchone()[0]
+                print(f"Updated SQL mode: {new_sql_mode}")
+            except Exception as e:
+                print(f"Failed to set SQL mode: {e}")
+        
+        # Get all database variables for debugging
+        print("\nImportant MySQL Variables:")
+        cursor.execute("SHOW VARIABLES LIKE '%char%'")
+        for var in cursor.fetchall():
+            print(f"{var[0]} = {var[1]}")
+            
+        cursor.execute("SHOW VARIABLES LIKE '%collation%'")
+        for var in cursor.fetchall():
+            print(f"{var[0]} = {var[1]}")
+        
+        cursor.close()
+        conn.close()
+        
+        print("\nDatabase connection successful!")
         return 0
-    except OperationalError as e:
-        print(f"❌ Database connection error: {e}")
-        return 1
     except Exception as e:
         print(f"❌ Unexpected error: {e}")
         return 1
