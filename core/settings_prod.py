@@ -29,25 +29,60 @@ MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 # Allow Railway domain
 ALLOWED_HOSTS = ['*']
 
-# Configure Database using Railway's DATABASE_URL
-if os.environ.get('DATABASE_URL'):
+# Configure Database using Railway's environment variables
+# Railway provides individual environment variables for MySQL
+MYSQL_URL = os.environ.get('MYSQL_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL')
+MYSQL_HOST = os.environ.get('MYSQLHOST') or os.environ.get('MYSQL_HOST')
+MYSQL_PORT = os.environ.get('MYSQLPORT') or os.environ.get('MYSQL_PORT')
+MYSQL_USER = os.environ.get('MYSQLUSER') or os.environ.get('MYSQL_USER') or os.environ.get('MYSQL_USERNAME')
+MYSQL_PASSWORD = os.environ.get('MYSQLPASSWORD') or os.environ.get('MYSQL_PASSWORD')
+MYSQL_DATABASE = os.environ.get('MYSQLDATABASE') or os.environ.get('MYSQL_DATABASE') or os.environ.get('MYSQL_DB')
+
+# Log database configuration for debugging
+print(f"Database configuration: URL={DATABASE_URL is not None}, MYSQL_URL={MYSQL_URL is not None}")
+print(f"MySQL direct config: HOST={MYSQL_HOST}, DB={MYSQL_DATABASE}, USER={MYSQL_USER is not None}")
+
+# First try DATABASE_URL if available
+if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
+            default=DATABASE_URL,
             conn_max_age=600,
             conn_health_checks=True,
         )
     }
-    
-    # Add MySQL-specific options if using MySQL
-    if DATABASES['default'].get('ENGINE') == 'django.db.backends.mysql':
-        DATABASES['default']['OPTIONS'] = {
-            'charset': 'utf8mb4',
-            'use_unicode': True,
+# Then try MYSQL_URL if available
+elif MYSQL_URL:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=MYSQL_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
+    }
+# Finally, try direct MySQL environment variables
+elif MYSQL_HOST and MYSQL_USER and MYSQL_PASSWORD and MYSQL_DATABASE:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': MYSQL_DATABASE,
+            'USER': MYSQL_USER,
+            'PASSWORD': MYSQL_PASSWORD,
+            'HOST': MYSQL_HOST,
+            'PORT': MYSQL_PORT or '3306',
         }
-        # Explicitly set the host to ensure TCP connection
-        if not DATABASES['default'].get('HOST'):
-            DATABASES['default']['HOST'] = '127.0.0.1'
+    }
+    print("Using direct MySQL configuration from environment variables")
+else:
+    print("WARNING: No database configuration found in environment variables!")
+
+# Add MySQL-specific options if using MySQL
+if 'default' in DATABASES and DATABASES['default'].get('ENGINE') == 'django.db.backends.mysql':
+    DATABASES['default']['OPTIONS'] = {
+        'charset': 'utf8mb4',
+        'use_unicode': True,
+    }
 
 # Disable browsable API in production
 REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES'] = (

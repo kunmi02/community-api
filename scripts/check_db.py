@@ -18,14 +18,35 @@ def main():
     print("Database Connection Checker")
     print("--------------------------")
     
-    # Check DATABASE_URL
+    # Check for various database configuration options
     db_url = os.environ.get('DATABASE_URL')
-    if not db_url:
-        print("ERROR: DATABASE_URL environment variable is not set!")
+    mysql_url = os.environ.get('MYSQL_URL')
+    mysql_host = os.environ.get('MYSQLHOST') or os.environ.get('MYSQL_HOST')
+    mysql_port = os.environ.get('MYSQLPORT') or os.environ.get('MYSQL_PORT') or '3306'
+    mysql_user = os.environ.get('MYSQLUSER') or os.environ.get('MYSQL_USER') or os.environ.get('MYSQL_USERNAME')
+    mysql_password = os.environ.get('MYSQLPASSWORD') or os.environ.get('MYSQL_PASSWORD')
+    mysql_database = os.environ.get('MYSQLDATABASE') or os.environ.get('MYSQL_DATABASE') or os.environ.get('MYSQL_DB')
+    
+    # Print available configuration
+    print(f"DATABASE_URL: {'Available' if db_url else 'Not set'}")
+    print(f"MYSQL_URL: {'Available' if mysql_url else 'Not set'}")
+    print(f"MySQL direct config: HOST={mysql_host}, DB={mysql_database}, USER={'Set' if mysql_user else 'Not set'}")
+    
+    # Construct a URL if we have direct MySQL variables but no URL
+    if not db_url and not mysql_url and mysql_host and mysql_user and mysql_password and mysql_database:
+        db_url = f"mysql://{mysql_user}:{mysql_password}@{mysql_host}:{mysql_port}/{mysql_database}"
+        print("Constructed database URL from individual MySQL environment variables")
+    
+    # Check if we have any database configuration
+    if not db_url and not mysql_url:
+        print("ERROR: No database configuration found in environment variables!")
         return 1
     
+    # Use the first available URL
+    connection_url = db_url or mysql_url
+    
     # Parse and sanitize the URL for display (hide password)
-    parsed = urlparse(db_url)
+    parsed = urlparse(connection_url)
     safe_url = f"{parsed.scheme}://{parsed.username}:****@{parsed.hostname}:{parsed.port}{parsed.path}"
     print(f"Using database URL: {safe_url}")
     
