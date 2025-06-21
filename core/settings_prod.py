@@ -43,39 +43,21 @@ MYSQL_DATABASE = os.environ.get('MYSQLDATABASE') or os.environ.get('MYSQL_DATABA
 print(f"Database configuration: URL={DATABASE_URL is not None}, MYSQL_URL={MYSQL_URL is not None}")
 print(f"MySQL direct config: HOST={MYSQL_HOST}, DB={MYSQL_DATABASE}, USER={MYSQL_USER is not None}")
 
-# First try DATABASE_URL if available
-if DATABASE_URL:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=DATABASE_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-# Then try MYSQL_URL if available
-elif MYSQL_URL:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=MYSQL_URL,
-            conn_max_age=600,
-            conn_health_checks=True,
-        )
-    }
-# Finally, try direct MySQL environment variables
-elif MYSQL_HOST and MYSQL_USER and MYSQL_PASSWORD and MYSQL_DATABASE:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': MYSQL_DATABASE,
-            'USER': MYSQL_USER,
-            'PASSWORD': MYSQL_PASSWORD,
-            'HOST': MYSQL_HOST,
-            'PORT': MYSQL_PORT or '3306',
+import os
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.getenv('MYSQLDATABASE', 'fallback_db'),
+        'USER': os.getenv('MYSQLUSER', 'root'),
+        'PASSWORD': os.getenv('MYSQLPASSWORD', ''),
+        'HOST': os.getenv('MYSQLHOST', '127.0.0.1'),  # not 'localhost'
+        'PORT': os.getenv('MYSQLPORT', '3306'),
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         }
     }
-    print("Using direct MySQL configuration from environment variables")
-else:
-    print("WARNING: No database configuration found in environment variables!")
+}
 
 # Add MySQL-specific options if using MySQL
 if 'default' in DATABASES and DATABASES['default'].get('ENGINE') == 'django.db.backends.mysql':
