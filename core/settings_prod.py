@@ -27,7 +27,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 # Allow Railway domain
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', '.railway.app']
 
 # Configure Database using Railway's environment variables
 # Railway provides individual environment variables for MySQL
