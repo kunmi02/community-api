@@ -3,8 +3,8 @@ builder = "NIXPACKS"
 buildCommand = "pip install -r requirements.txt"
 
 [deploy]
-startCommand = "gunicorn core.wsgi_prod:application --bind 0.0.0.0:$PORT"
-healthcheckPath = "/admin/login/"
+startCommand = "python manage.py migrate && gunicorn core.wsgi_prod:application --bind 0.0.0.0:$PORT"
+healthcheckPath = "/"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
