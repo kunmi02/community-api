@@ -12,6 +12,10 @@ import django
 import MySQLdb
 from urllib.parse import urlparse
 
+# Add the current directory to the Python path
+sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
+print(f"Python path: {sys.path}")
+
 # Set up Django environment
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings_prod")
 

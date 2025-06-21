@@ -6,6 +6,10 @@ echo "Starting application setup..."
 echo "Python version: $(python --version)"
 echo "Working directory: $(pwd)"
 
+# Ensure application code is in Python path
+export PYTHONPATH="$PYTHONPATH:$(pwd)"
+echo "Python path: $PYTHONPATH"
+
 # Check if DATABASE_URL is set
 if [ -z "$DATABASE_URL" ]; then
     echo "WARNING: DATABASE_URL environment variable is not set!"
