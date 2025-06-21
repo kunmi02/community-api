@@ -17,9 +17,28 @@ fi
 echo "Checking Django configuration..."
 python -c "import django; print(f'Django version: {django.get_version()}')" || echo "Failed to import Django"
 
-# Check database connection
-echo "Checking database connection..."
-python scripts/check_db.py || echo "Database check failed, but continuing..."
+# Wait for database to be ready
+echo "Waiting for database to be ready..."
+MAX_DB_RETRIES=30
+DB_RETRY_COUNT=0
+DB_RETRY_DELAY=5
+
+while [ $DB_RETRY_COUNT -lt $MAX_DB_RETRIES ]; do
+    echo "Attempt $((DB_RETRY_COUNT+1)) of $MAX_DB_RETRIES to connect to database..."
+    if python scripts/check_db.py; then
+        echo "✅ Database connection successful!"
+        break
+    else
+        DB_RETRY_COUNT=$((DB_RETRY_COUNT+1))
+        if [ $DB_RETRY_COUNT -eq $MAX_DB_RETRIES ]; then
+            echo "❌ Failed to connect to database after $MAX_DB_RETRIES attempts."
+            echo "Continuing anyway, as the application might work with retry logic."
+        else
+            echo "Database connection attempt $DB_RETRY_COUNT failed. Retrying in $DB_RETRY_DELAY seconds..."
+            sleep $DB_RETRY_DELAY
+        fi
+    fi
+done
 
 # Run database migrations with retries
 echo "Running database migrations..."

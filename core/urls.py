@@ -25,7 +25,28 @@ from drf_yasg import openapi
 
 # Simple health check view
 def health_check(request):
-    return JsonResponse({"status": "ok", "message": "Service is running"})
+    import os
+    import sys
+    import django
+    
+    # Collect system information for debugging
+    debug_info = {
+        "status": "ok",
+        "message": "Service is running",
+        "django_version": django.get_version(),
+        "python_version": sys.version,
+        "environment": {
+            "DJANGO_SETTINGS_MODULE": os.environ.get("DJANGO_SETTINGS_MODULE", "Not set"),
+            "DATABASE_URL_SET": os.environ.get("DATABASE_URL") is not None,
+            "MYSQL_VARS_SET": any(os.environ.get(var) for var in ["MYSQLHOST", "MYSQL_HOST"]),
+        },
+        "request_meta": {
+            "HTTP_HOST": request.META.get("HTTP_HOST", "Not available"),
+            "REMOTE_ADDR": request.META.get("REMOTE_ADDR", "Not available"),
+        }
+    }
+    
+    return JsonResponse(debug_info)
 
 # Schema configuration for API documentation
 schema_view = get_schema_view(
