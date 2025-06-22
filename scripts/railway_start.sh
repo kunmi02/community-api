@@ -71,4 +71,4 @@ python manage.py collectstatic --no-input || echo "Static file collection failed
 
 # Start the application
 echo "Starting Gunicorn server..."
-exec gunicorn core.wsgi_prod:application --bind 0.0.0.0:$PORT --log-level debug
+exec gunicorn core.wsgi_prod:application --bind 0.0.0.0:$PORT
