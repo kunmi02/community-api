@@ -31,8 +31,8 @@ ALLOWED_HOSTS = ['*', '.railway.app']
 
 # Configure Database using Railway's environment variables
 # Railway provides individual environment variables for MySQL
-MYSQL_URL = os.environ.get('MYSQL_URL')
-DATABASE_URL = os.environ.get('DATABASE_URL')
+# MYSQL_URL = os.environ.get('MYSQLURL')
+# DATABASE_URL = os.environ.get('DATABASE_URL')
 MYSQL_HOST = os.environ.get('MYSQLHOST') or os.environ.get('MYSQL_HOST')
 MYSQL_PORT = os.environ.get('MYSQLPORT') or os.environ.get('MYSQL_PORT')
 MYSQL_USER = os.environ.get('MYSQLUSER') or os.environ.get('MYSQL_USER') or os.environ.get('MYSQL_USERNAME')
@@ -40,7 +40,7 @@ MYSQL_PASSWORD = os.environ.get('MYSQLPASSWORD') or os.environ.get('MYSQL_PASSWO
 MYSQL_DATABASE = os.environ.get('MYSQLDATABASE') or os.environ.get('MYSQL_DATABASE') or os.environ.get('MYSQL_DB')
 
 # Log database configuration for debugging
-print(f"Database configuration: URL={DATABASE_URL is not None}, MYSQL_URL={MYSQL_URL is not None}")
+# print(f"Database configuration: URL={DATABASE_URL is not None}, MYSQL_URL={MYSQL_URL is not None}")
 print(f"MySQL direct config: HOST={MYSQL_HOST}, DB={MYSQL_DATABASE}, USER={MYSQL_USER is not None}")
 
 import os
