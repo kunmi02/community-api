@@ -40,6 +40,28 @@ A robust Django REST API for community groups and posts with user authentication
 
 ## Installation
 
+### Prerequisites
+
+Before installing the Python dependencies, you need to install some system packages:
+
+#### Ubuntu/Debian
+```bash
+sudo apt update
+sudo apt install -y default-libmysqlclient-dev python3-dev build-essential
+```
+
+#### macOS
+```bash
+brew install mysql-client
+# You may need to add mysql-client to your PATH
+export PATH="/usr/local/opt/mysql-client/bin:$PATH"
+```
+
+#### Windows
+Install MySQL Connector C from the official MySQL website and add it to your PATH.
+
+### Setup
+
 1. Clone the repository
 2. Create a virtual environment:
    ```
@@ -98,6 +120,51 @@ Example production command:
 ```
 gunicorn core.wsgi:application --bind 0.0.0.0:8000
 ```
+
+## Docker Usage
+
+This project includes Docker configuration for easy development and deployment.
+
+### Using Docker Compose (Recommended for Development)
+
+1. Make sure you have Docker and Docker Compose installed on your system.
+
+2. Create a `.env` file with your environment variables (see Installation section).
+
+3. Build and start the containers:
+   ```bash
+   docker-compose up --build
+   ```
+
+4. The API will be available at http://localhost:8000
+
+5. To run commands inside the container:
+   ```bash
+   # Run migrations
+   docker-compose exec web python manage.py migrate
+   
+   # Create superuser
+   docker-compose exec web python manage.py createsuperuser
+   ```
+
+6. To stop the containers:
+   ```bash
+   docker-compose down
+   ```
+
+### Using Dockerfile (Production)
+
+1. Build the Docker image:
+   ```bash
+   docker build -t community-api .
+   ```
+
+2. Run the container:
+   ```bash
+   docker run -p 8000:8000 --env-file .env -e PORT=8000 community-api
+   ```
+
+3. For production deployment, consider using container orchestration services like Kubernetes or Docker Swarm.
 
 ## License
 
